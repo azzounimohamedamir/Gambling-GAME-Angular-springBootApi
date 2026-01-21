@@ -1,0 +1,276 @@
+<div class="game-page">
+  <div class="background-animation"></div>
+  <div class="floating-particles" id="particles"></div>
+
+  <!-- Effect containers -->
+  <div class="fireworks-container" id="fireworksContainer"></div>
+  <div class="sad-rain-container" id="sadRainContainer"></div>
+  <div class="sparkles-container" id="sparklesContainer"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">Gambling</div>
+      
+      <div class="user-info">
+        <div class="welcome-text">
+          <span class="username">{{ username }}</span>
+          <span style="color: red;" class="username">#{{ userId }}</span>
+        </div>
+
+        <div class="balance-display">
+          Balance: $<span>{{ formatCurrency(balance) }}</span>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-deposit" (click)="showDepositModal()">💰 Deposit</button>
+          <button class="btn btn-withdraw" (click)="showWithdrawModal()">💸 Withdraw</button>
+          <button class="btn btn-logout" (click)="logout()">🚪 Logout</button>
+          <button class="btn btn-transfer" (click)="showTransferModal()">🔄 Transfer</button>
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="language-switcher" id="languageSwitcher">
+          <div class="language-current" (click)="toggleLanguageDropdown()" [class.active]="isLanguageDropdownOpen">
+            <div class="flag" [ngClass]="currentLanguageFlag"></div>
+            <span class="language-text">{{ currentLanguageText }}</span>
+            <div class="dropdown-arrow"></div>
+          </div>
+          
+          <div class="language-dropdown" [class.show]="isLanguageDropdownOpen">
+            <a 
+              *ngFor="let lang of languages"
+              class="language-option" 
+              [class.active]="currentLanguage === lang.code"
+              (click)="selectLanguage(lang)">
+              <div class="flag" [ngClass]="lang.flag"></div>
+              <span class="language-name">{{ lang.name }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Game Section -->
+    <div class="game-section">
+      <!-- Main Game Card -->
+      <div class="game-card">
+        <h2 class="game-title">🎯 Guess the Lucky Numbers</h2>
+        
+      <div class="number-inputs">
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+  <input type="number" class="number-input" min="0" max="9" maxlength="1" (input)="limitInput($event)" #numberInput />
+</div>
+        <div class="bet-section">
+          <div class="bet-input-container">
+            <label class="bet-label">💵 Bet Amount:</label>
+            <input 
+              type="number" 
+              class="bet-input" 
+              [(ngModel)]="betAmount"
+              min="1" 
+              max="1000" 
+              placeholder="Enter bet amount" />
+          </div>
+          <button 
+            class="play-btn" 
+            (click)="playGame()"
+            [disabled]="isPlaying">
+            {{ isPlaying ? '🎲 PLAYING...' : '🎲 PLAY NOW' }}
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div *ngIf="showResult" class="message success-message">
+          {{ gameResult }}
+        </div>
+        <div *ngIf="showError" class="message error-message">
+          {{ gameError }}
+        </div>
+        <div *ngIf="showNeutral" class="message neutral-message">
+          {{ gameNeutral }}
+        </div>
+      </div>
+
+      <!-- Statistics Card -->
+      <div class="stats-card">
+        <h3 class="stats-title">🏆 Winning Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ statistics.totalGames }}</div>
+            <div class="stat-label">Games Played</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">{{ statistics.wins }}</div>
+            <div class="stat-label">Total Wins</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">{{ statistics.losses }}</div>
+            <div class="stat-label">Total Losses</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">{{ statistics.winRate.toFixed(1) }}%</div>
+            <div class="stat-label">Win Rate</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">\${{ formatCurrency(statistics.totalWinnings) }}</div>
+            <div class="stat-label">Total Winnings</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">\${{ formatCurrency(statistics.totalBets) }}</div>
+            <div class="stat-label">Total Bets</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">\${{ formatCurrency(statistics.netProfit) }}</div>
+            <div class="stat-label">Net Profit</div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-value">{{ statistics.averageCorrectPositions?.toFixed(1) }}</div>
+            <div class="stat-label">Avg Correct Positions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game History Card -->
+    <div class="stats-card">
+      <h3 class="stats-title">📊 Game History</h3>
+      <div class="history-container">
+        <div 
+          *ngFor="let game of gameHistory" 
+          class="history-item"
+          [class.win]="game.isWin"
+          [class.loss]="!game.isWin">
+          <div>
+            <strong>Guess:</strong> {{ game.guess }} | 
+            <strong>Correct:</strong> {{ game.correctNumber }}
+          </div>
+          <div>
+            <strong>Positions:</strong> {{ game.correctPositions }} | 
+            <strong>Bet:</strong> \${{ formatCurrency(game.betAmount) }} | 
+            <strong>Result:</strong> {{ game.isWin ? 'Win' : 'Loss' }} 
+            <span [class.positive]="game.isWin" [class.negative]="!game.isWin">
+              {{ game.isWin ? '+' : '-' }}\${{ formatCurrency(game.winAmount) }}
+            </span>
+          </div>
+          <div style="font-size: 0.8em; color: #888;">
+            {{ formatDate(game.timestamp) }}
+          </div>
+        </div>
+        
+        <div *ngIf="gameHistory.length === 0" class="no-history">
+          No games played yet. Start playing to see your history!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deposit Modal -->
+  <div class="modal" [class.show]="depositModal" (click)="closeModal('deposit')">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <span class="close" (click)="closeModal('deposit')">&times;</span>
+      <h3 class="modal-title">💰 Deposit Funds</h3>
+      
+      <form [formGroup]="depositForm" (ngSubmit)="deposit()">
+        <div class="form-group">
+          <label class="form-label">Amount ($):</label>
+          <input 
+            type="number" 
+            class="form-input" 
+            formControlName="amount"
+            min="1" 
+            step="0.01" 
+            placeholder="Enter deposit amount">
+        </div>
+        <button 
+          type="submit"
+          class="btn btn-deposit" 
+          [disabled]="depositForm.invalid || isDepositing"
+          style="width: 100%; margin-top: 20px;">
+          {{ isDepositing ? '💳 Processing...' : '💳 Deposit Now' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Withdraw Modal -->
+  <div class="modal" [class.show]="withdrawModal" (click)="closeModal('withdraw')">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <span class="close" (click)="closeModal('withdraw')">&times;</span>
+      <h3 class="modal-title">💸 Withdraw Funds</h3>
+      
+      <form [formGroup]="withdrawForm" (ngSubmit)="withdraw()">
+        <div class="form-group">
+          <label class="form-label">Amount ($):</label>
+          <input 
+            type="number" 
+            class="form-input" 
+            formControlName="amount"
+            min="1" 
+            step="0.01" 
+            [max]="balance"
+            placeholder="Enter withdrawal amount">
+        </div>
+        <button 
+          type="submit"
+          class="btn btn-withdraw" 
+          [disabled]="withdrawForm.invalid || isWithdrawing"
+          style="width: 100%; margin-top: 20px;">
+          {{ isWithdrawing ? '🏦 Processing...' : '🏦 Withdraw Now' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transfer Modal -->
+  <div class="modal" [class.show]="transferModal" (click)="closeModal('transfer')">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <span class="close" (click)="closeModal('transfer')">&times;</span>
+      <h3 class="modal-title">🔄 Transfer Funds</h3>
+      
+      <form [formGroup]="transferForm" (ngSubmit)="transfer()">
+        <div class="form-group">
+          <label class="form-label">Receiver User ID:</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            formControlName="receiverId"
+            placeholder="Enter receiver user ID">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount ($):</label>
+          <input 
+            type="number" 
+            class="form-input" 
+            formControlName="amount"
+            min="1" 
+            step="0.01" 
+            [max]="balance"
+            placeholder="Enter amount">
+        </div>
+        <button 
+          type="submit"
+          class="btn btn-transfer" 
+          [disabled]="transferForm.invalid || isTransferring"
+          style="width: 100%; margin-top: 20px;">
+          {{ isTransferring ? '🔄 Processing...' : '🔄 Transfer Now' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
